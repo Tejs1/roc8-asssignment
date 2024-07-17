@@ -12,6 +12,7 @@ import {
   varchar,
   integer,
   primaryKey,
+  boolean,
 } from "drizzle-orm/pg-core";
 
 /**
@@ -42,49 +43,40 @@ export const posts = createTable(
 export const users = createTable("users", {
   id: uuid("id").defaultRandom().primaryKey(),
   name: text("name").notNull(),
-  email: varchar("email", { length: 256 }).notNull(),
+  email: varchar("email", { length: 255 }).notNull().unique(),
+  password: varchar("password", { length: 255 }).notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
 });
 
 export const categories = createTable("categories", {
   id: serial("id").primaryKey(),
-  name: text("name").notNull(),
+  name: varchar("name", { length: 255 }).notNull(),
 });
 
-export const usersToCategories = createTable(
-  "users_to_categories",
-  {
-    userId: uuid("user_id")
-      .notNull()
-      .references(() => users.id),
-    categoryId: integer("category_id")
-      .notNull()
-      .references(() => categories.id),
-  },
-  (table) => ({
-    pk: primaryKey({
-      name: "users_categories",
-      columns: [table.userId, table.categoryId],
-    }),
-  }),
-);
+export const userCategories = createTable("user_categories", {
+  id: serial("id").primaryKey(),
+  userId: uuid("user_id").references(() => users.id),
+  categoryId: integer("category_id").references(() => categories.id),
+  isInterested: boolean("is_interested").default(false),
+});
 
 export const usersRelations = relations(users, ({ many }) => ({
-  categories: many(usersToCategories),
+  categories: many(userCategories),
 }));
 
 export const categoriesRelations = relations(categories, ({ many }) => ({
-  users: many(usersToCategories),
+  users: many(userCategories),
 }));
 
 export const usersToCategoriesRelations = relations(
-  usersToCategories,
+  userCategories,
   ({ one }) => ({
     user: one(users, {
-      fields: [usersToCategories.userId],
+      fields: [userCategories.userId],
       references: [users.id],
     }),
     category: one(categories, {
-      fields: [usersToCategories.categoryId],
+      fields: [userCategories.categoryId],
       references: [categories.id],
     }),
   }),

@@ -1,18 +1,18 @@
-import { categories, users, usersToCategories } from "@/server/db/schema";
+import { categories, users, userCategories } from "@/server/db/schema";
 import { db } from "@/server/db";
 import { seedCategories } from "./seedCategories";
 import { conn } from "@/server/db";
 async function clearDatabase() {
-  await db.delete(usersToCategories).execute();
+  await db.delete(userCategories).execute();
   await db.delete(users).execute();
   await db.delete(categories).execute();
 }
 
 async function insertSeedData() {
   await db.insert(users).values([
-    { name: "Alice", email: "Alice@nyc.com" },
-    { name: "Bob", email: "Bob@nyc.com" },
-    { name: "Charlie", email: "Charlie@nyc.com" },
+    { name: "Alice", email: "Alice@nyc.com", password: "password" },
+    { name: "Bob", email: "Bob@nyc.com", password: "password" },
+    { name: "Charlie", email: "Charlie@nyc.com", password: "password" },
   ]);
   await db.insert(categories).values(seedCategories.map((name) => ({ name })));
 }
