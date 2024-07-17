@@ -1,13 +1,17 @@
 // Example model schema from the Drizzle docs
 // https://orm.drizzle.team/docs/sql-schema-declaration
 
-import { sql } from "drizzle-orm";
+import { sql, relations } from "drizzle-orm";
 import {
   index,
   pgTableCreator,
   serial,
   timestamp,
+  uuid,
+  text,
   varchar,
+  integer,
+  primaryKey,
 } from "drizzle-orm/pg-core";
 
 /**
@@ -27,10 +31,61 @@ export const posts = createTable(
       .default(sql`CURRENT_TIMESTAMP`)
       .notNull(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).$onUpdate(
-      () => new Date()
+      () => new Date(),
     ),
   },
   (example) => ({
     nameIndex: index("name_idx").on(example.name),
-  })
+  }),
+);
+
+export const users = createTable("users", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  name: text("name").notNull(),
+  email: varchar("email", { length: 256 }).notNull(),
+});
+
+export const categories = createTable("categories", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+});
+
+export const usersToCategories = createTable(
+  "users_to_categories",
+  {
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id),
+    categoryId: integer("category_id")
+      .notNull()
+      .references(() => categories.id),
+  },
+  (table) => ({
+    pk: primaryKey({
+      name: "users_categories",
+      columns: [table.userId, table.categoryId],
+    }),
+  }),
+);
+
+export const usersRelations = relations(users, ({ many }) => ({
+  categories: many(usersToCategories),
+}));
+
+export const categoriesRelations = relations(categories, ({ many }) => ({
+  users: many(usersToCategories),
+}));
+
+export const usersToCategoriesRelations = relations(
+  usersToCategories,
+  ({ one }) => ({
+    user: one(users, {
+      fields: [usersToCategories.userId],
+      references: [users.id],
+    }),
+    category: one(categories, {
+      fields: [usersToCategories.categoryId],
+      references: [categories.id],
+    }),
+  }),
 );
