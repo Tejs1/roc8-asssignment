@@ -5,13 +5,18 @@ import { api } from "@/trpc/react";
 
 export default function Categories() {
   const [page, setPage] = useState(1);
-  const { data, isLoading } = api.auth.getCategories.useQuery({
-    page,
-    pageSize: 6,
+  const {
+    data,
+    isLoading,
+    refetch: refetchCategories,
+  } = api.auth.getCategories.useQuery({ page, pageSize: 6 });
+  const { data: userCategories, refetch: refetchUserCategories } =
+    api.auth.getUserCategories.useQuery();
+  const updateUserCategory = api.auth.updateUserCategories.useMutation({
+    onSuccess: () => {
+      refetchUserCategories();
+    },
   });
-  const { data: userCategories } = api.auth.getUserCategories.useQuery();
-  console.log(userCategories);
-  const updateUserCategory = api.auth.updateUserCategories.useMutation();
 
   const handleCategoryToggle = async (
     categoryId: number,
