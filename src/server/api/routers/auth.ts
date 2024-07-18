@@ -44,17 +44,17 @@ export const authRouter = createTRPCRouter({
   login: publicProcedure
     .input(
       z.object({
-        email: z.string().email(),
+        emailAddress: z.string().email(),
         password: z.string(),
       }),
     )
     .mutation(async ({ input, ctx }) => {
-      const { email, password } = input;
+      const { emailAddress, password } = input;
 
       const user = await ctx.db
         .select()
         .from(users)
-        .where(eq(users.email, email))
+        .where(eq(users.email, emailAddress))
         .limit(1);
 
       if (!user[0] || !(await bcrypt.compare(password, user[0].password))) {
