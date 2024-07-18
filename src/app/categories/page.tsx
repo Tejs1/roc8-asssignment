@@ -5,47 +5,44 @@ import { api } from "@/trpc/react";
 
 export default function Categories() {
   const [page, setPage] = useState(1);
+  const utils = api.useUtils();
+
   const {
     data,
-    isLoading,
+    isLoading: categoriesLoading,
     refetch: refetchCategories,
   } = api.auth.getCategories.useQuery({ page, pageSize: 6 });
 
-  const { data: userCategories, refetch: refetchUserCategories } =
-    api.auth.getUserCategories.useQuery();
-
-  const queryClient = api.useContext();
+  const {
+    data: userCategories,
+    isLoading: userCategoriesLoading,
+    refetch: refetchUserCategories,
+  } = api.auth.getUserCategories.useQuery();
 
   const updateUserCategory = api.auth.updateUserCategories.useMutation({
     onMutate: async (newCategory) => {
-      // Cancel any outgoing refetches
-      await queryClient.auth.getUserCategories.cancel();
+      await utils.auth.getUserCategories.cancel();
+      const previousCategories = utils.auth.getUserCategories.getData();
 
-      // Snapshot the previous value
-      const previousCategories = queryClient.auth.getUserCategories.getData();
-
-      // Optimistically update to the new value
-      queryClient.auth.getUserCategories.setData(undefined, (old) => {
+      utils.auth.getUserCategories.setData(undefined, (old) => {
+        const oldCategories = old ?? [];
         if (newCategory.isInterested) {
-          return [...(old ?? []), newCategory.categoryId];
+          return [...oldCategories, newCategory.categoryId];
         } else {
-          return (old ?? []).filter((id) => id !== newCategory.categoryId);
+          return oldCategories.filter((id) => id !== newCategory.categoryId);
         }
       });
 
-      // Return a context object with the snapshotted value
       return { previousCategories };
     },
     onError: (err, newCategory, context) => {
-      // If the mutation fails, use the context returned from onMutate to roll back
-      queryClient.auth.getUserCategories.setData(
+      utils.auth.getUserCategories.setData(
         undefined,
         context?.previousCategories,
       );
     },
     onSettled: () => {
-      // Always refetch after error or success to ensure data consistency
-      queryClient.auth.getUserCategories.invalidate();
+      utils.auth.getUserCategories.invalidate();
     },
   });
 
@@ -53,7 +50,7 @@ export default function Categories() {
     updateUserCategory.mutate({ categoryId, isInterested });
   };
 
-  if (isLoading) return <div>Loading...</div>;
+  if (categoriesLoading || userCategoriesLoading) return <div>Loading...</div>;
 
   return (
     <div>
