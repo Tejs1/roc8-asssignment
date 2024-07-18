@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { api } from "@/trpc/react";
 
 export default function Categories() {
@@ -10,19 +10,47 @@ export default function Categories() {
     isLoading,
     refetch: refetchCategories,
   } = api.auth.getCategories.useQuery({ page, pageSize: 6 });
+
   const { data: userCategories, refetch: refetchUserCategories } =
     api.auth.getUserCategories.useQuery();
+
+  const queryClient = api.useContext();
+
   const updateUserCategory = api.auth.updateUserCategories.useMutation({
-    onSuccess: () => {
-      refetchUserCategories();
+    onMutate: async (newCategory) => {
+      // Cancel any outgoing refetches
+      await queryClient.auth.getUserCategories.cancel();
+
+      // Snapshot the previous value
+      const previousCategories = queryClient.auth.getUserCategories.getData();
+
+      // Optimistically update to the new value
+      queryClient.auth.getUserCategories.setData(undefined, (old) => {
+        if (newCategory.isInterested) {
+          return [...(old ?? []), newCategory.categoryId];
+        } else {
+          return (old ?? []).filter((id) => id !== newCategory.categoryId);
+        }
+      });
+
+      // Return a context object with the snapshotted value
+      return { previousCategories };
+    },
+    onError: (err, newCategory, context) => {
+      // If the mutation fails, use the context returned from onMutate to roll back
+      queryClient.auth.getUserCategories.setData(
+        undefined,
+        context?.previousCategories,
+      );
+    },
+    onSettled: () => {
+      // Always refetch after error or success to ensure data consistency
+      queryClient.auth.getUserCategories.invalidate();
     },
   });
 
-  const handleCategoryToggle = async (
-    categoryId: number,
-    isInterested: boolean,
-  ) => {
-    await updateUserCategory.mutateAsync({ categoryId, isInterested });
+  const handleCategoryToggle = (categoryId: number, isInterested: boolean) => {
+    updateUserCategory.mutate({ categoryId, isInterested });
   };
 
   if (isLoading) return <div>Loading...</div>;
