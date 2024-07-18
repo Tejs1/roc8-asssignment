@@ -13,6 +13,7 @@ import {
   integer,
   primaryKey,
   boolean,
+  uniqueIndex,
 } from "drizzle-orm/pg-core";
 
 /**
@@ -53,13 +54,27 @@ export const categories = createTable("categories", {
   name: varchar("name", { length: 255 }).notNull(),
 });
 
-export const userCategories = createTable("user_categories", {
-  id: serial("id").primaryKey(),
-  userId: uuid("user_id").references(() => users.id),
-  categoryId: integer("category_id").references(() => categories.id),
-  isInterested: boolean("is_interested").default(false),
-});
-
+export const userCategories = createTable(
+  "user_categories",
+  {
+    id: serial("id").primaryKey(),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id),
+    categoryId: integer("category_id")
+      .notNull()
+      .references(() => categories.id),
+    isInterested: boolean("is_interested").default(false),
+  },
+  (table) => {
+    return {
+      userCategoryUnique: uniqueIndex("user_category_unique").on(
+        table.userId,
+        table.categoryId,
+      ),
+    };
+  },
+);
 export const usersRelations = relations(users, ({ many }) => ({
   categories: many(userCategories),
 }));
