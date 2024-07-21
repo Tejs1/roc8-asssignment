@@ -61,7 +61,7 @@ export default function SignUp() {
       router.push("/categories");
       // change the UI to our pending section.
       setIsLoading(false);
-    } catch (err: any) {
+    } catch (err) {
       console.error(JSON.stringify(err, null, 2));
     } finally {
       setIsLoading(false);
@@ -76,7 +76,7 @@ export default function SignUp() {
         const type: string = input.id;
 
         const constraintEmail = new RegExp(
-          constraints[type as InputType][0] || "",
+          constraints[type as InputType][0] ?? "",
         );
         if (constraintEmail.test(input.value)) {
           input.setCustomValidity("");
@@ -84,7 +84,7 @@ export default function SignUp() {
           input.setCustomValidity(constraints[type as InputType][1] ?? "");
         }
       }
-      setIsFormValid((formRef.current as HTMLFormElement).checkValidity());
+      setIsFormValid(formRef.current.checkValidity());
     }
   }
 

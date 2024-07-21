@@ -4,7 +4,7 @@ import { t } from "./trpc";
 import { env } from "@/env";
 const SECRET_KEY = new TextEncoder().encode(env.SECRET_KEY);
 export const authMiddleware = t.middleware(async ({ ctx, next }) => {
-  const token = await ctx.headers.get("authorization")?.replace("Bearer ", "");
+  const token = ctx.headers.get("authorization")?.replace("Bearer ", "");
 
   if (!token) {
     throw new TRPCError({ code: "UNAUTHORIZED" });

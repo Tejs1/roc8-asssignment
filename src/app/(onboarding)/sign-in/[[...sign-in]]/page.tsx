@@ -7,7 +7,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { z } from "zod";
 
-import { cn, constraints } from "@/lib/utils";
+import { constraints } from "@/lib/utils";
 
 import { Icons } from "@/components/icons";
 import { Button } from "@/components/ui/button";
@@ -57,7 +57,7 @@ export default function UserAuthForm() {
       // window.location.href = "/categories";
       localStorage.setItem("token", result.token);
       router.push("/categories");
-    } catch (err: any) {
+    } catch (err) {
       console.error("error", err);
     }
   }
@@ -79,7 +79,7 @@ export default function UserAuthForm() {
           input.setCustomValidity(constraints[type as InputType][1] ?? "");
         }
       }
-      setIsFormValid((formRef.current as HTMLFormElement).checkValidity());
+      setIsFormValid(formRef.current.checkValidity());
     }
   }
 

@@ -48,13 +48,13 @@ export default function Categories() {
       return { previousCategories };
     },
     onError: (err, newCategory, context) => {
-      utils.auth.getUserCategories.setData(
+      void utils.auth.getUserCategories.setData(
         undefined,
         context?.previousCategories,
       );
     },
     onSettled: () => {
-      utils.auth.getUserCategories.invalidate();
+      void utils.auth.getUserCategories.invalidate();
     },
   });
 
@@ -63,14 +63,17 @@ export default function Categories() {
     isInterested: boolean | "indeterminate",
   ) => {
     if (typeof isInterested === "string") return;
-    updateUserCategory.mutate({ categoryId, isInterested });
+    void updateUserCategory.mutate({ categoryId, isInterested });
   };
   useEffect(() => {
     setTotalPages(data?.totalPages ?? 1);
   }, [data]);
   useEffect(() => {
     if (data && currentPage < data.totalPages) {
-      utils.auth.getCategories.prefetch({ page: currentPage + 1, pageSize: 6 });
+      void utils.auth.getCategories.prefetch({
+        page: currentPage + 1,
+        pageSize: 6,
+      });
     }
   }, [currentPage, data, utils]);
   if (userCategoriesLoading) return <div>Loading...</div>;

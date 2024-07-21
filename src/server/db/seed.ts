@@ -3,6 +3,7 @@ import { db } from "@/server/db";
 import { seedCategories } from "./seedCategories";
 import { conn } from "@/server/db";
 async function clearDatabase() {
+  //
   await db.delete(userCategories).execute();
   await db.delete(users).execute();
   await db.delete(categories).execute();
@@ -25,7 +26,7 @@ export async function seed() {
 
   try {
     console.log("Starting database seeding...");
-    await db.transaction(async (transactionDb) => {
+    await db.transaction(async () => {
       await clearDatabase();
       await insertSeedData();
     });
