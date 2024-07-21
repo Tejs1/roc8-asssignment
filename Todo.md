@@ -5,6 +5,7 @@
 - [x] store user name in db
 - [ ] signout user button
 - [ ] if user is logged in, redirect to categories page
+- [ ] store auth token in cookie instead of local storage
 
 ## Features
 
