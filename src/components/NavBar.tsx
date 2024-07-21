@@ -70,6 +70,7 @@ export function NavBar() {
         <Link href="/help"> Help</Link>
         <Link href="/orders"> orders</Link>
         <Link href="/profile"> HI John</Link>
+        <Link href="/categories">Categories</Link>
       </div>
       <div className="flex w-full flex-row items-center justify-between">
         <NavigationMenu>

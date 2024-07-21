@@ -4,7 +4,7 @@ import { GeistSans } from "geist/font/sans";
 import { type Metadata } from "next";
 
 import { TRPCReactProvider } from "@/trpc/react";
-import { Header } from "@/app/components/Header";
+
 import { NavBar } from "@/components/NavBar";
 import { ThemeProvider } from "@/components/theme-provider";
 
@@ -23,11 +23,11 @@ export default function RootLayout({
       className={`${GeistSans.variable}`}
       suppressHydrationWarning
     >
-      <body>
+      <body className="flex min-h-screen w-full flex-col items-center">
         <TRPCReactProvider>
           <ThemeProvider>
             <NavBar />
-            <Header />
+
             {children}
           </ThemeProvider>
         </TRPCReactProvider>
