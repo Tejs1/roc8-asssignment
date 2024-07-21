@@ -15,19 +15,19 @@ export const authRouter = createTRPCRouter({
   signup: publicProcedure
     .input(
       z.object({
-        email: z.string().email(),
+        emailAddress: z.string().email(),
         password: z.string().min(8),
         name: z.string(),
       }),
     )
     .mutation(async ({ input, ctx }) => {
-      const { email, password, name } = input;
+      const { emailAddress, password, name } = input;
       const hashedPassword = await bcrypt.hash(password, 10);
 
       const user = await ctx.db
         .insert(users)
         .values({
-          email,
+          email: emailAddress,
           password: hashedPassword,
           name,
         })
