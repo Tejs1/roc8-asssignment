@@ -90,7 +90,7 @@ export const authRouter = createTRPCRouter({
         .select({ count: sql<number>`count(*)` })
         .from(categories);
 
-      const totalCategories = total[0]?.count! as number;
+      const totalCategories = total[0]?.count ?? 0;
       return {
         categories: categoriesData,
         totalPages: Math.ceil(totalCategories / pageSize),
