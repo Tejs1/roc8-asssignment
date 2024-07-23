@@ -1,12 +1,11 @@
 "use client";
 
-import { Suspense, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { api } from "@/trpc/react";
 
 import { getToken } from "@/lib/utils";
 import CategoryList from "./CategoryList";
-import Loading from "./loading";
 import CategoryLoading from "@/components/CategoryLoading";
 import PaginationComponent from "@/components/PaginationComponent";
 
@@ -16,21 +15,14 @@ export default function Categories() {
   const [totalPages, setTotalPages] = useState(1);
   const utils = api.useUtils();
 
-  const {
-    data,
-    isLoading: categoriesLoading,
-    refetch: refetchCategories,
-  } = api.auth.getCategories.useQuery({ page: currentPage, pageSize: 6 });
+  const { data, isLoading: categoriesLoading } =
+    api.auth.getCategories.useQuery({ page: currentPage, pageSize: 6 });
 
   if (!categoriesLoading && data === undefined) {
     localStorage.removeItem("token");
     router.push("/sign-in?redirect=categories");
   }
-  const {
-    data: userCategories,
-    isLoading: userCategoriesLoading,
-    refetch: refetchUserCategories,
-  } = api.auth.getUserCategories.useQuery();
+  const { data: userCategories } = api.auth.getUserCategories.useQuery();
 
   const updateUserCategory = api.auth.updateUserCategories.useMutation({
     onMutate: async (newCategory) => {

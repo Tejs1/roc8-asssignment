@@ -3,8 +3,6 @@ import {
   PaginationContent,
   PaginationItem,
   PaginationLink,
-  PaginationNext,
-  PaginationPrevious,
 } from "@/components/ui/pagination";
 import {
   ChevronLeft,
@@ -29,7 +27,7 @@ export default function PaginationComponent({
 
     const visiblePages = 5;
     let firstPage = Math.max(1, currentPage - Math.floor(visiblePages / 2));
-    let lastPage = Math.min(totalPages, firstPage + visiblePages - 1);
+    const lastPage = Math.min(totalPages, firstPage + visiblePages - 1);
 
     if (lastPage - firstPage + 1 < visiblePages) {
       firstPage = Math.max(1, lastPage - visiblePages + 1);
@@ -41,7 +39,6 @@ export default function PaginationComponent({
           <PaginationLink
             className="h-8 w-8"
             onClick={() => onPageChange(page)}
-            // className={page === currentPage ? "bg-primary text-white" : ""}
             isActive={page === currentPage}
           >
             {page}
