@@ -20,9 +20,7 @@ interface SignInFormValues {
   password: string;
 }
 type SignInOptions = {
-  searchParams: {
-    [key: string]: string;
-  };
+  searchParams: Record<string, string>;
 };
 export default function SignIn({ searchParams }: SignInOptions) {
   const {

@@ -1,5 +1,5 @@
 import { Checkbox } from "@/components/ui/checkbox";
-import { Key } from "react";
+
 interface CategoryListProps {
   categories: { name: string; id: number }[];
 
