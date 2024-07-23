@@ -21,7 +21,6 @@ const initialState = {
 
 export default function SignUp() {
   const signup = api.auth.signup.useMutation();
-  const [name, setName] = React.useState("");
   const router = useRouter();
 
   const [pendingVerification, setPendingVerification] = React.useState(false);
@@ -41,11 +40,8 @@ export default function SignUp() {
     }
 
     setIsLoading(true);
-    //get input values
     const formData = new FormData(form);
     const name = formData.get("name") as string;
-    setName(name);
-
     const emailAddress = formData.get("email") as string;
     const password = formData.get("password") as string;
 
@@ -55,19 +51,16 @@ export default function SignUp() {
         password,
         name,
       });
-      // Store the token and redirect to protected page
-      console.log(result);
-      localStorage.setItem("token", result.token);
-      router.push("/categories");
-      // change the UI to our pending section.
-      setIsLoading(false);
+      if (result.success) {
+        localStorage.setItem("token", result.token ?? "");
+        router.push("/categories");
+      }
     } catch (err) {
       console.error(JSON.stringify(err, null, 2));
     } finally {
       setIsLoading(false);
     }
   }
-
   function validateForm(e: React.ChangeEvent<HTMLInputElement>) {
     if (formRef.current) {
       if (e && constraints.hasOwnProperty(e.target.id)) {
