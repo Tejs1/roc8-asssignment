@@ -1,8 +1,6 @@
 import { TRPCError } from "@trpc/server";
-import { jwtVerify } from "jose";
 import { t } from "./trpc";
-import { env } from "@/env";
-const SECRET_KEY = new TextEncoder().encode(env.SECRET_KEY);
+import { verifyAuth } from "@/lib/auth";
 export const authMiddleware = t.middleware(async ({ ctx, next }) => {
   const token = ctx.headers.get("authorization")?.replace("Bearer ", "");
 
@@ -11,12 +9,12 @@ export const authMiddleware = t.middleware(async ({ ctx, next }) => {
   }
 
   try {
-    const verified = await jwtVerify(token, SECRET_KEY);
+    const verified = await verifyAuth(token);
 
     return next({
       ctx: {
         ...ctx,
-        user: verified.payload as { userId: string },
+        user: verified.userId,
       },
     });
   } catch (err) {
