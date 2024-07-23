@@ -6,7 +6,12 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
-import { ChevronsLeftIcon, ChevronsRightIcon } from "lucide-react";
+import {
+  ChevronLeft,
+  ChevronRight,
+  ChevronsLeft,
+  ChevronsRightIcon,
+} from "lucide-react";
 
 interface PaginationComponentProps {
   currentPage: number;
@@ -32,10 +37,12 @@ export default function PaginationComponent({
 
     for (let page = firstPage; page <= lastPage; page++) {
       buttons.push(
-        <PaginationItem key={page} className="h-8 w-8">
+        <PaginationItem key={page}>
           <PaginationLink
+            className="h-8 w-8"
             onClick={() => onPageChange(page)}
-            className={page === currentPage ? "bg-blue-500 text-white" : ""}
+            // className={page === currentPage ? "bg-primary text-white" : ""}
+            isActive={page === currentPage}
           >
             {page}
           </PaginationLink>
@@ -51,29 +58,37 @@ export default function PaginationComponent({
       <PaginationContent>
         <PaginationItem key="prev-10" className="h-8 w-8">
           <PaginationLink
+            className="h-8 w-8"
             disabled={currentPage <= 10}
             onClick={() => onPageChange(Math.max(1, currentPage - 10))}
           >
-            <ChevronsLeftIcon className="h-4 w-4" />
+            <ChevronsLeft className="h-4 w-4" />
           </PaginationLink>
         </PaginationItem>
         <PaginationItem key="prev" className="h-8 w-8">
-          <PaginationPrevious
+          <PaginationLink
             disabled={currentPage <= 1}
             aria-disabled={currentPage <= 1}
             onClick={() => onPageChange(currentPage - 1)}
-          />
+            className="h-8 w-8"
+          >
+            <ChevronLeft className="h-4 w-4" />
+          </PaginationLink>
         </PaginationItem>
         {paginationButtons()}
         <PaginationItem key="next" className="h-8 w-8">
-          <PaginationNext
+          <PaginationLink
+            className="h-8 w-8"
             disabled={currentPage >= totalPages}
             aria-disabled={currentPage >= totalPages}
             onClick={() => onPageChange(currentPage + 1)}
-          />
+          >
+            <ChevronRight className="h-4 w-4" />
+          </PaginationLink>
         </PaginationItem>
         <PaginationItem key="next-10" className="h-8 w-8">
           <PaginationLink
+            className="h-8 w-8"
             disabled={currentPage + 5 > totalPages}
             onClick={() => onPageChange(Math.min(totalPages, currentPage + 10))}
           >
