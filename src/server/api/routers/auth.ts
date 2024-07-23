@@ -1,15 +1,12 @@
-import { TypeOf, z } from "zod";
-import { SignJWT } from "jose";
+import { z } from "zod";
 import bcrypt from "bcrypt";
 import { TRPCError } from "@trpc/server";
 import { protectedProcedure } from "@/server/api/middleware";
 import { createTRPCRouter, publicProcedure } from "@/server/api/trpc";
-import { env } from "@/env";
 import { categories, users, userCategories } from "@/server/db/schema";
 import { eq } from "drizzle-orm";
+import { signAuth } from "@/lib/auth";
 import { and, sql } from "drizzle-orm/sql";
-
-const SECRET_KEY = new TextEncoder().encode(env.SECRET_KEY);
 
 export const authRouter = createTRPCRouter({
   signup: publicProcedure
@@ -33,12 +30,9 @@ export const authRouter = createTRPCRouter({
         })
         .returning();
 
-      const token = await new SignJWT({ userId: user[0]?.id })
-        .setProtectedHeader({ alg: "HS256" })
-        .setExpirationTime("1h")
-        .sign(SECRET_KEY);
+      const token = user[0] ? await signAuth(user[0].id) : null;
 
-      return { token };
+      return { success: true, token };
     }),
 
   login: publicProcedure
@@ -61,12 +55,9 @@ export const authRouter = createTRPCRouter({
         throw new TRPCError({ code: "UNAUTHORIZED" });
       }
 
-      const token = await new SignJWT({ userId: user[0].id })
-        .setProtectedHeader({ alg: "HS256" })
-        .setExpirationTime("1h")
-        .sign(SECRET_KEY);
+      const token = await signAuth(user[0].id);
 
-      return { token };
+      return { success: true, token };
     }),
 
   getCategories: protectedProcedure
@@ -106,7 +97,7 @@ export const authRouter = createTRPCRouter({
     )
     .mutation(async ({ input, ctx }) => {
       const { categoryId, isInterested } = input;
-      const userId = ctx.user.userId;
+      const userId = ctx.user;
 
       await ctx.db
         .insert(userCategories)
@@ -120,7 +111,7 @@ export const authRouter = createTRPCRouter({
     }),
 
   getUserCategories: protectedProcedure.query(async ({ ctx }) => {
-    const userId = ctx.user.userId;
+    const userId = ctx.user;
 
     const userCats = await ctx.db
       .select()
