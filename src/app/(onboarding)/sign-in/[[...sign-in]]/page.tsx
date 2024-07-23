@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { api } from "@/trpc/react";
 import Link from "next/link";
 import { useForm, Controller, SubmitHandler } from "react-hook-form";
-import { cn, constraints } from "@/lib/utils";
+import { constraints, props } from "@/lib/utils";
 import { Icons } from "@/components/icons";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -19,10 +19,8 @@ interface SignInFormValues {
   email: string;
   password: string;
 }
-type SignInOptions = {
-  searchParams: Record<string, string>;
-};
-export default function SignIn({ searchParams }: SignInOptions) {
+
+export default function SignIn({ searchParams }: props) {
   const {
     handleSubmit,
     control,
