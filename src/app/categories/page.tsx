@@ -17,6 +17,11 @@ import { getToken } from "@/lib/utils";
 import CategoryList from "./CategoryList";
 import Loading from "./loading";
 import CategoryLoading from "@/components/CategoryLoading";
+import {
+  ChevronsLeft,
+  ChevronsLeftIcon,
+  ChevronsRightIcon,
+} from "lucide-react";
 
 export default function Categories() {
   const router = useRouter();
@@ -70,15 +75,18 @@ export default function Categories() {
     if (typeof isInterested === "string") return;
     void updateUserCategory.mutate({ categoryId, isInterested });
   };
+
   useEffect(() => {
     const token = getToken();
     if (!token) {
       router.push("/sign-in?redirect=categories");
     }
   }, [router]);
+
   useEffect(() => {
     setTotalPages(data?.totalPages ?? 1);
   }, [data]);
+
   useEffect(() => {
     if (data && currentPage < data.totalPages) {
       void utils.auth.getCategories.prefetch({
@@ -93,6 +101,75 @@ export default function Categories() {
       });
     }
   }, [currentPage, data, utils]);
+
+  const paginationButtons = () => {
+    const buttons = [];
+
+    buttons.push(
+      <PaginationItem key="prev-10" className="h-8 w-8">
+        <PaginationLink
+          disabled={currentPage <= 10}
+          onClick={() => setCurrentPage(Math.max(1, currentPage - 10))}
+        >
+          <ChevronsLeftIcon className="h-4 w-4" />
+        </PaginationLink>
+      </PaginationItem>,
+    );
+
+    buttons.push(
+      <PaginationItem key="prev" className="h-8 w-8">
+        <PaginationPrevious
+          disabled={currentPage <= 1}
+          aria-disabled={currentPage <= 1}
+          onClick={() => setCurrentPage(currentPage - 1)}
+        />
+      </PaginationItem>,
+    );
+
+    const visiblePages = 5;
+    let firstPage = Math.max(1, currentPage - Math.floor(visiblePages / 2));
+    let lastPage = Math.min(totalPages, firstPage + visiblePages - 1);
+
+    if (lastPage - firstPage + 1 < visiblePages) {
+      firstPage = Math.max(1, lastPage - visiblePages + 1);
+    }
+
+    for (let page = firstPage; page <= lastPage; page++) {
+      buttons.push(
+        <PaginationItem key={page} className="h-8 w-8">
+          <PaginationLink
+            onClick={() => setCurrentPage(page)}
+            isActive={page === currentPage}
+          >
+            {page}
+          </PaginationLink>
+        </PaginationItem>,
+      );
+    }
+
+    buttons.push(
+      <PaginationItem key="next" className="h-8 w-8">
+        <PaginationNext
+          disabled={currentPage >= totalPages}
+          aria-disabled={currentPage >= totalPages}
+          onClick={() => setCurrentPage(currentPage + 1)}
+        />
+      </PaginationItem>,
+    );
+
+    buttons.push(
+      <PaginationItem key="next-10" className="h-8 w-8">
+        <PaginationLink
+          disabled={currentPage + 5 > totalPages}
+          onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 10))}
+        >
+          <ChevronsRightIcon className="h-4 w-4" />
+        </PaginationLink>
+      </PaginationItem>,
+    );
+
+    return buttons;
+  };
 
   return (
     <main className="flex h-full flex-grow flex-col items-center">
@@ -127,36 +204,10 @@ export default function Categories() {
               )}
             </ul>
           </div>
-          <nav>
-            <Pagination>
-              <PaginationContent>
-                <PaginationItem>
-                  <PaginationPrevious
-                    disabled={currentPage <= 1}
-                    aria-disabled={currentPage <= 1}
-                    onClick={() => setCurrentPage(currentPage - 1)}
-                  />
-                </PaginationItem>
 
-                <PaginationItem>
-                  <PaginationLink onClick={() => setCurrentPage(currentPage)}>
-                    {currentPage}
-                  </PaginationLink>
-                </PaginationItem>
-                <PaginationItem>
-                  <PaginationEllipsis />
-                </PaginationItem>
-
-                <PaginationItem>
-                  <PaginationNext
-                    disabled={currentPage >= totalPages}
-                    aria-disabled={currentPage >= totalPages}
-                    onClick={() => setCurrentPage(currentPage + 1)}
-                  />
-                </PaginationItem>
-              </PaginationContent>
-            </Pagination>
-          </nav>
+          <Pagination className="mt-4">
+            <PaginationContent>{paginationButtons()}</PaginationContent>
+          </Pagination>
         </div>
       </div>
     </main>
