@@ -4,7 +4,11 @@ import { twMerge } from "tailwind-merge";
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
-export const constraints = {
+export type Constraints = {
+  email: [string, string];
+  password: [string, string];
+};
+export const constraints: Constraints = {
   email: [
     "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+.[a-zA-Z]{2,}$",
     "Invalid email address",
