@@ -21,3 +21,8 @@ export const constraints: Constraints = {
 
 export const getToken = () =>
   localStorage !== undefined ? localStorage.getItem("token") : null;
+
+export type props = {
+  params: Record<string, string>;
+  searchParams: Record<string, string>;
+};
