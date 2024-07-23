@@ -14,10 +14,7 @@ export default function CategoryList(props: CategoryListProps) {
   return (
     <>
       {categories.map((category) => (
-        <li
-          key={category.id}
-          className="flex flex-row items-start space-x-3 space-y-0"
-        >
+        <li key={category.id} className="flex flex-row items-start space-y-0">
           <Checkbox
             id={category.id.toString()}
             checked={userCategories?.includes(category.id)}
@@ -28,7 +25,7 @@ export default function CategoryList(props: CategoryListProps) {
 
           <label
             htmlFor={category.id.toString()}
-            className="text-sm font-normal peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+            className="cursor-pointer pl-3 text-sm font-normal peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
           >
             {category.name}
           </label>

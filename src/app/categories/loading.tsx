@@ -1,14 +1,12 @@
-"use client";
 import { Skeleton } from "@/components/ui/skeleton";
-export default function SkeletonCard() {
+
+export default function Loading() {
   return (
-    <div className="h-40 space-y-2">
-      {Array.from({ length: 6 }).map((_, index) => (
-        <div className="flex h-5 flex-row items-start space-x-3 space-y-0">
-          <Skeleton className="h-4 w-4" />
-          <Skeleton className={`h-4 w-[80px]`} />
-        </div>
-      ))}
-    </div>
+    <main className="flex h-full flex-grow flex-col items-center">
+      <div className="m-auto grid h-[422px] w-[504px] rounded-3xl border p-10">
+        <Skeleton className="h-3/6 w-full" />
+        <Skeleton className="h-full w-full" />
+      </div>
+    </main>
   );
 }

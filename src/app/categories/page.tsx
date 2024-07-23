@@ -13,10 +13,10 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
-import { Checkbox } from "@/components/ui/checkbox";
 import { getToken } from "@/lib/utils";
 import CategoryList from "./CategoryList";
 import Loading from "./loading";
+import CategoryLoading from "@/components/CategoryLoading";
 
 export default function Categories() {
   const router = useRouter();
@@ -93,7 +93,6 @@ export default function Categories() {
       });
     }
   }, [currentPage, data, utils]);
-  if (userCategoriesLoading) return <div>Loading...</div>;
 
   return (
     <main className="flex h-full flex-grow flex-col items-center">
@@ -118,7 +117,7 @@ export default function Categories() {
             </div>
             <ul className="h-40 space-y-2">
               {categoriesLoading ? (
-                <Loading />
+                <CategoryLoading />
               ) : (
                 <CategoryList
                   categories={data?.categories ?? []}
