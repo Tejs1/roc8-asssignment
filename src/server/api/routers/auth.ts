@@ -123,7 +123,6 @@ export const authRouter = createTRPCRouter({
         ),
       );
 
-    console.log(userCats);
     return userCats.map(({ categoryId }) => categoryId);
   }),
 });

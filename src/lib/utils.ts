@@ -1,3 +1,4 @@
+"use client";
 import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
 
@@ -18,3 +19,6 @@ export const constraints: Constraints = {
     "At least one letter and one number",
   ],
 };
+
+export const getToken = () =>
+  localStorage !== undefined ? localStorage.getItem("token") : null;

@@ -10,23 +10,28 @@ import { Icons } from "@/components/icons";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-
+import { getToken } from "@/lib/utils";
+const initialState = {
+  email: "",
+  password: "",
+};
 interface SignInFormValues {
   email: string;
   password: string;
 }
-
-export default function SignUp() {
+type SignInOptions = {
+  searchParams: {
+    [key: string]: string;
+  };
+};
+export default function SignIn({ searchParams }: SignInOptions) {
   const {
     handleSubmit,
     control,
     formState: { errors, isValid },
   } = useForm<SignInFormValues>({
     mode: "onChange",
-    defaultValues: {
-      email: "",
-      password: "",
-    },
+    defaultValues: initialState,
   });
   const login = api.auth.login.useMutation();
   const router = useRouter();
@@ -51,18 +56,39 @@ export default function SignUp() {
     }
   };
 
+  React.useEffect(() => {
+    const token = getToken();
+    if (token) {
+      router.push("/categories");
+    }
+  }, [router]);
   return (
     <main className="flex h-full flex-grow flex-col items-center justify-center">
       <div className="m-auto grid w-[400px] gap-6 rounded-3xl border p-10">
         <div className="flex flex-col items-center justify-start">
           <h1 className="text-[32px] font-semibold">Login</h1>
-          <h2 className="text-2xl">
-            <span className="text-accent-foreground">Welcome back to </span>{" "}
-            Nuecomm
-          </h2>
-          <span className="text-muted-foreground">
-            The next gen business marketplace
-          </span>
+          {searchParams.redirect === "categories" ? (
+            <>
+              <h2 className="text-2xl">
+                <span className="text-accent-foreground">
+                  Sign in to continue
+                </span>
+              </h2>
+              <span className="text-muted-foreground">
+                and mark your interests!
+              </span>
+            </>
+          ) : (
+            <>
+              <h2 className="text-2xl">
+                <span className="text-accent-foreground">Welcome back to </span>
+                Nuecomm
+              </h2>
+              <span className="text-muted-foreground">
+                The next gen business marketplace
+              </span>
+            </>
+          )}
         </div>
         <form onSubmit={handleSubmit(onSubmit)}>
           <div className="grid gap-1">

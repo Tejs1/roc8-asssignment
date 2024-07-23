@@ -1,7 +1,6 @@
 import { SignJWT, jwtVerify } from "jose";
 import { cookies } from "next/headers";
 import { env } from "@/env";
-import exp from "constants";
 
 const SECRET_KEY = new TextEncoder().encode(env.SECRET_KEY);
 

@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { api } from "@/trpc/react";
 
 import {
@@ -13,8 +14,12 @@ import {
   PaginationPrevious,
 } from "@/components/ui/pagination";
 import { Checkbox } from "@/components/ui/checkbox";
+import { getToken } from "@/lib/utils";
+import CategoryList from "./CategoryList";
+import Loading from "./loading";
 
 export default function Categories() {
+  const router = useRouter();
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const utils = api.useUtils();
@@ -66,12 +71,24 @@ export default function Categories() {
     void updateUserCategory.mutate({ categoryId, isInterested });
   };
   useEffect(() => {
+    const token = getToken();
+    if (!token) {
+      router.push("/sign-in?redirect=categories");
+    }
+  }, [router]);
+  useEffect(() => {
     setTotalPages(data?.totalPages ?? 1);
   }, [data]);
   useEffect(() => {
     if (data && currentPage < data.totalPages) {
       void utils.auth.getCategories.prefetch({
         page: currentPage + 1,
+        pageSize: 6,
+      });
+    }
+    if (data && currentPage + 1 < data.totalPages) {
+      void utils.auth.getCategories.prefetch({
+        page: currentPage + 2,
         pageSize: 6,
       });
     }
@@ -99,28 +116,16 @@ export default function Categories() {
                 My saved interests!
               </label>
             </div>
-            <ul className="space-y-2">
-              {data?.categories.map((category) => (
-                <li
-                  key={category.id}
-                  className="flex flex-row items-start space-x-3 space-y-0"
-                >
-                  <Checkbox
-                    id={category.id.toString()}
-                    checked={userCategories?.includes(category.id)}
-                    onCheckedChange={(isChecked) =>
-                      handleCategoryToggle(category.id, isChecked)
-                    }
-                  />
-
-                  <label
-                    htmlFor={category.id.toString()}
-                    className="text-sm font-normal peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                  >
-                    {category.name}
-                  </label>
-                </li>
-              ))}
+            <ul className="h-40 space-y-2">
+              {categoriesLoading ? (
+                <Loading />
+              ) : (
+                <CategoryList
+                  categories={data?.categories ?? []}
+                  userCategories={userCategories}
+                  handleCategoryToggle={handleCategoryToggle}
+                />
+              )}
             </ul>
           </div>
           <nav>

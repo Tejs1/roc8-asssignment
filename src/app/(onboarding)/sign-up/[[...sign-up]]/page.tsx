@@ -10,6 +10,7 @@ import { Icons } from "@/components/icons";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { getToken } from "@/lib/utils";
 
 interface SignUpFormData {
   name: string;
@@ -55,6 +56,12 @@ export default function SignUp() {
     }
   };
 
+  React.useEffect(() => {
+    const token = getToken();
+    if (token) {
+      router.push("/categories");
+    }
+  }, [router]);
   return (
     <main className="flex h-full flex-grow flex-col items-center justify-center">
       <div className="m-auto grid w-[400px] gap-6 rounded-3xl border p-10">
