@@ -4,14 +4,15 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { api } from "@/trpc/react";
 
-import { getToken } from "@/lib/utils";
+import { getToken, props } from "@/lib/utils";
 import CategoryList from "./CategoryList";
 import CategoryLoading from "@/components/CategoryLoading";
 import PaginationComponent from "@/components/PaginationComponent";
 
-export default function Categories() {
+export default function Categories({ searchParams }: props) {
+  const { page } = searchParams;
   const router = useRouter();
-  const [currentPage, setCurrentPage] = useState(1);
+  const [currentPage, setCurrentPage] = useState(page ? parseInt(page) : 1);
   const [totalPages, setTotalPages] = useState(1);
   const utils = api.useUtils();
 
@@ -71,13 +72,14 @@ export default function Categories() {
   }, [data]);
 
   useEffect(() => {
-    if (data && currentPage < data.totalPages) {
+    router.push(`/categories?page=${currentPage}`);
+    if (!categoriesLoading && data && currentPage < data.totalPages) {
       void utils.auth.getCategories.prefetch({
         page: currentPage + 1,
         pageSize: 6,
       });
     }
-    if (data && currentPage + 1 < data.totalPages) {
+    if (!categoriesLoading && data && currentPage + 1 < data.totalPages) {
       void utils.auth.getCategories.prefetch({
         page: currentPage + 2,
         pageSize: 6,
