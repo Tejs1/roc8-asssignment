@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { getToken } from "@/lib/utils";
+import { useAuth } from "@/contexts/AuthContext";
 const initialState = {
   email: "",
   password: "",
@@ -31,6 +32,7 @@ export default function SignIn({ searchParams }: props) {
   });
   const login = api.auth.login.useMutation();
   const router = useRouter();
+  const { updateUser } = useAuth();
 
   const [isLoading, setIsLoading] = React.useState<boolean>(false);
 
@@ -43,6 +45,11 @@ export default function SignIn({ searchParams }: props) {
       });
       if (result.success) {
         localStorage.setItem("token", result.token ?? "");
+        updateUser({
+          id: result.id,
+          name: result.name,
+          email: result.email,
+        });
         router.push("/categories");
       }
     } catch (err) {
@@ -64,20 +71,33 @@ export default function SignIn({ searchParams }: props) {
         <div className="flex flex-col items-center justify-start">
           <h1 className="text-[32px] font-semibold">Login</h1>
           {searchParams.redirect === "categories" ? (
-            <>
-              <h2 className="text-2xl">
-                <span className="text-accent-foreground">
-                  Sign in to continue
+            searchParams.sessionExpired === "true" ? (
+              <>
+                <h2 className="text-2xl">
+                  <span className="text-accent-foreground">
+                    Session Expired
+                  </span>
+                </h2>
+                <span className="text-muted-foreground">
+                  Please sign in again to continue
                 </span>
-              </h2>
-              <span className="text-muted-foreground">
-                and mark your interests!
-              </span>
-            </>
+              </>
+            ) : (
+              <>
+                <h2 className="text-2xl">
+                  <span className="text-accent-foreground">
+                    Sign in to continue
+                  </span>
+                </h2>
+                <span className="text-muted-foreground">
+                  and mark your interests!
+                </span>
+              </>
+            )
           ) : (
             <>
               <h2 className="text-2xl">
-                <span className="text-accent-foreground">Welcome back to </span>
+                <span className="text-accent-foreground">Welcome to </span>
                 Nuecomm
               </h2>
               <span className="text-muted-foreground">

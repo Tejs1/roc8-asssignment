@@ -8,21 +8,21 @@ import { getToken, props } from "@/lib/utils";
 import CategoryList from "./CategoryList";
 import CategoryLoading from "@/components/CategoryLoading";
 import PaginationComponent from "@/components/PaginationComponent";
+import { useAuth } from "@/contexts/AuthContext";
 
 export default function Categories({ searchParams }: props) {
-  const { page } = searchParams;
   const router = useRouter();
+  const { user } = useAuth();
+  if (!user.id) {
+    router.push("/sign-in?redirect=categories");
+  }
+  const { page } = searchParams;
   const [currentPage, setCurrentPage] = useState(page ? parseInt(page) : 1);
-  const [totalPages, setTotalPages] = useState(1);
   const utils = api.useUtils();
 
   const { data, isLoading: categoriesLoading } =
     api.auth.getCategories.useQuery({ page: currentPage, pageSize: 6 });
 
-  if (!categoriesLoading && data === undefined) {
-    localStorage.removeItem("token");
-    router.push("/sign-in?redirect=categories");
-  }
   const { data: userCategories } = api.auth.getUserCategories.useQuery();
 
   const updateUserCategory = api.auth.updateUserCategories.useMutation({
@@ -61,15 +61,12 @@ export default function Categories({ searchParams }: props) {
   };
 
   useEffect(() => {
-    const token = getToken();
-    if (!token) {
-      router.push("/sign-in?redirect=categories");
+    if (!categoriesLoading && data === undefined) {
+      localStorage.removeItem("token");
+      console.error("Token is invalid");
+      router.push("/sign-in?redirect=categories&sessionExpired=true");
     }
-  }, [router]);
-
-  useEffect(() => {
-    setTotalPages(data?.totalPages ?? 1);
-  }, [data]);
+  }, [categoriesLoading, data, router]);
 
   useEffect(() => {
     router.push(`/categories?page=${currentPage}`);
@@ -86,6 +83,10 @@ export default function Categories({ searchParams }: props) {
       });
     }
   }, [currentPage, data, utils]);
+
+  useEffect(() => {
+    page === undefined && setCurrentPage(1);
+  }, [page]);
 
   return (
     <main className="flex h-full flex-grow flex-col items-center">
@@ -123,7 +124,7 @@ export default function Categories({ searchParams }: props) {
 
           <PaginationComponent
             currentPage={currentPage}
-            totalPages={totalPages}
+            totalPages={data?.totalPages ?? 1}
             onPageChange={setCurrentPage}
           />
         </div>
