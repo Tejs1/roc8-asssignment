@@ -3,7 +3,6 @@ import { db } from "@/server/db";
 import { seedCategories } from "./seedCategories";
 import { conn } from "@/server/db";
 async function clearDatabase() {
-  //
   await db.delete(userCategories).execute();
   await db.delete(users).execute();
   await db.delete(categories).execute();

@@ -8,7 +8,7 @@ const AuthContext = createContext<{
   updateUser: (user: User) => void;
 }>({
   user: { id: null, name: null, email: null },
-  updateUser: () => {},
+  updateUser: (user: User) => void { user },
 });
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
