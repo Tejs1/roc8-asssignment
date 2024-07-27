@@ -65,7 +65,6 @@ export default function Categories({ searchParams }: props) {
   useEffect(() => {
     if (!categoriesLoading && data === undefined) {
       localStorage.removeItem("token");
-      console.error("Token is invalid");
       router.push("/sign-in?redirect=categories&sessionExpired=true");
     }
   }, [categoriesLoading, data, router]);
