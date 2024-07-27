@@ -57,11 +57,14 @@ export default function Categories({ searchParams }: props) {
     if (typeof isInterested === "string") return;
     void updateUserCategory.mutate({ categoryId, isInterested });
   };
+
   useEffect(() => {
     if (!user.id) {
       router.push("/sign-in?redirect=categories");
+      return;
     }
-  }, []);
+  }, [user, router]);
+
   useEffect(() => {
     if (!categoriesLoading && data === undefined) {
       localStorage.removeItem("token");
@@ -88,6 +91,10 @@ export default function Categories({ searchParams }: props) {
   useEffect(() => {
     page === undefined && setCurrentPage(1);
   }, [page]);
+
+  if (!user.id) {
+    return null;
+  }
 
   return (
     <main className="flex h-full flex-grow flex-col items-center">
