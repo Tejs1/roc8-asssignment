@@ -64,6 +64,12 @@ export default function Categories({ searchParams }: props) {
       return;
     }
   }, [user, router]);
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      router.push("/sign-in?redirect=categories");
+    }
+  }, [router]);
 
   useEffect(() => {
     if (!categoriesLoading && data === undefined) {
@@ -93,6 +99,7 @@ export default function Categories({ searchParams }: props) {
   }, [page]);
 
   if (!user.id) {
+    router.push("/sign-in?redirect=categories");
     return null;
   }
 
