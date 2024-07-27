@@ -29,10 +29,18 @@ export const authRouter = createTRPCRouter({
           name,
         })
         .returning();
+      if (!user[0]) {
+        throw new TRPCError({ code: "NOT_FOUND" });
+      }
+      const token = await signAuth(user[0].id);
 
-      const token = user[0] ? await signAuth(user[0].id) : null;
-
-      return { success: true, token };
+      return {
+        success: true,
+        token,
+        id: user[0].id,
+        name: user[0].name,
+        email: user[0].email,
+      };
     }),
 
   login: publicProcedure
@@ -52,14 +60,33 @@ export const authRouter = createTRPCRouter({
         .limit(1);
 
       if (!user[0] || !(await bcrypt.compare(password, user[0].password))) {
-        throw new TRPCError({ code: "UNAUTHORIZED" });
+        throw new TRPCError({ code: "BAD_REQUEST" });
       }
 
       const token = await signAuth(user[0].id);
 
-      return { success: true, token };
+      return {
+        success: true,
+        token,
+        id: user[0].id,
+        name: user[0].name,
+        email: user[0].email,
+      };
     }),
 
+  getUser: protectedProcedure.query(async ({ ctx }) => {
+    const user = await ctx.db
+      .select({
+        id: users.id,
+        name: users.name,
+        email: users.email,
+      })
+      .from(users)
+      .where(eq(users.id, ctx.user))
+      .limit(1);
+
+    return user[0] ?? null;
+  }),
   getCategories: protectedProcedure
     .input(
       z.object({

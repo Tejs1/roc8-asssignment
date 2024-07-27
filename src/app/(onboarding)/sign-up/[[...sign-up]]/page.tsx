@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { getToken } from "@/lib/utils";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface SignUpFormData {
   name: string;
@@ -24,6 +25,8 @@ const initialState = {
 };
 
 export default function SignUp() {
+  const { updateUser } = useAuth();
+
   const {
     handleSubmit,
     control,
@@ -47,6 +50,11 @@ export default function SignUp() {
       });
       if (result.success) {
         localStorage.setItem("token", result.token ?? "");
+        updateUser({
+          id: result.id,
+          name: result.name,
+          email: result.email,
+        });
         router.push("/categories");
       }
     } catch (err) {

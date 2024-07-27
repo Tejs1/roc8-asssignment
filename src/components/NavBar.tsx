@@ -6,6 +6,7 @@ import Link from "next/link";
 import { Search, ShoppingCart, ChevronRight, ChevronLeft } from "lucide-react";
 
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/contexts/AuthContext";
 // import { Icons } from "@/components/icons";
 import {
   NavigationMenu,
@@ -59,17 +60,20 @@ const components: { title: string; href: string; description: string }[] = [
 ];
 
 export function NavBar() {
-  const router = useRouter();
+  const { user } = useAuth();
+
   return (
     <div className="w-full">
       <div className="flex w-full items-center justify-end gap-4 pr-4 pt-1">
-        <Link href="/sign-up"> SignUp</Link>
-        <Link href="/sign-in"> Login</Link>
-        <button onClick={() => router.push("/")}>Sign Out</button>
         <Link href="/help"> Help</Link>
-        <Link href="/orders"> orders</Link>
-        <Link href="/profile"> HI John</Link>
-        <Link href="/categories">Categories</Link>
+        {user.id ? (
+          <>
+            <Link href="/orders">Orders</Link>
+            <Link href="/profile">Hi {user.name?.split(" ")[0]}</Link>
+          </>
+        ) : (
+          <Link href="/sign-in">Login</Link>
+        )}
       </div>
       <div className="flex w-full flex-row items-center justify-between">
         <NavigationMenu>
@@ -81,6 +85,13 @@ export function NavBar() {
         </NavigationMenu>
         <NavigationMenu>
           <NavigationMenuList>
+            <NavigationMenuItem>
+              <Link href="/categories" legacyBehavior passHref>
+                <NavigationMenuLink className={navigationMenuTriggerStyle()}>
+                  Categories
+                </NavigationMenuLink>
+              </Link>
+            </NavigationMenuItem>
             <NavigationMenuItem>
               <NavigationMenuTrigger>Getting started</NavigationMenuTrigger>
               <NavigationMenuContent>
@@ -132,13 +143,6 @@ export function NavBar() {
                   ))}
                 </ul>
               </NavigationMenuContent>
-            </NavigationMenuItem>
-            <NavigationMenuItem>
-              <Link href="/docs" legacyBehavior passHref>
-                <NavigationMenuLink className={navigationMenuTriggerStyle()}>
-                  Documentation
-                </NavigationMenuLink>
-              </Link>
             </NavigationMenuItem>
           </NavigationMenuList>
         </NavigationMenu>
