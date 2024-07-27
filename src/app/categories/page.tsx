@@ -13,9 +13,7 @@ import { useAuth } from "@/contexts/AuthContext";
 export default function Categories({ searchParams }: props) {
   const router = useRouter();
   const { user } = useAuth();
-  if (!user.id) {
-    router.push("/sign-in?redirect=categories");
-  }
+
   const { page } = searchParams;
   const [currentPage, setCurrentPage] = useState(page ? parseInt(page) : 1);
   const utils = api.useUtils();
@@ -59,7 +57,11 @@ export default function Categories({ searchParams }: props) {
     if (typeof isInterested === "string") return;
     void updateUserCategory.mutate({ categoryId, isInterested });
   };
-
+  useEffect(() => {
+    if (!user.id) {
+      router.push("/sign-in?redirect=categories");
+    }
+  }, []);
   useEffect(() => {
     if (!categoriesLoading && data === undefined) {
       localStorage.removeItem("token");
