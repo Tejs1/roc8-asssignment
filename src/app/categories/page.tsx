@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { api } from "@/trpc/react";
 
-import { getToken, props } from "@/lib/utils";
+import { type props } from "@/lib/utils";
 import CategoryList from "./CategoryList";
 import CategoryLoading from "@/components/CategoryLoading";
 import PaginationComponent from "@/components/PaginationComponent";
@@ -82,7 +82,7 @@ export default function Categories({ searchParams }: props) {
         pageSize: 6,
       });
     }
-  }, [currentPage, data, utils]);
+  }, [currentPage, data, utils, categoriesLoading, router]);
 
   useEffect(() => {
     page === undefined && setCurrentPage(1);

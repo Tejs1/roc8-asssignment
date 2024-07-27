@@ -18,7 +18,6 @@ import {
   navigationMenuTriggerStyle,
 } from "@/components/ui/navigation-menu";
 
-import { useRouter } from "next/navigation";
 import { ThemeSwitch } from "@/components/ThemeSwitch";
 
 const components: { title: string; href: string; description: string }[] = [

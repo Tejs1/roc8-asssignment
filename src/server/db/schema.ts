@@ -11,7 +11,6 @@ import {
   text,
   varchar,
   integer,
-  primaryKey,
   boolean,
   uniqueIndex,
 } from "drizzle-orm/pg-core";
