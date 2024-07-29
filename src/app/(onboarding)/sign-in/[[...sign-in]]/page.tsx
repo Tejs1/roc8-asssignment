@@ -32,7 +32,7 @@ export default function SignIn({ searchParams }: props) {
   const utils = api.useUtils();
   const login = api.auth.login.useMutation();
 
-  const { data: user, isLoading: isUserLoading } = useAuth();
+  const { user, isLoading: isUserLoading } = useAuth();
 
   const [isLoading, setIsLoading] = React.useState<boolean>(false);
 
