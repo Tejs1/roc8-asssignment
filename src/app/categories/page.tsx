@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useEffect } from "react";
+import { redirect, useRouter } from "next/navigation";
 import { api } from "@/trpc/react";
 
 import { type props } from "@/lib/utils";
@@ -12,16 +12,26 @@ import { useAuth } from "@/contexts/AuthContext";
 
 export default function Categories({ searchParams }: props) {
   const router = useRouter();
-  const { user } = useAuth();
+  const utils = api.useUtils();
+  const { user, isLoading: isUserLoading } = useAuth();
 
   const { page } = searchParams;
-  const [currentPage, setCurrentPage] = useState(page ? parseInt(page) : 1);
-  const utils = api.useUtils();
+  const currentPage = page ? parseInt(page, 10) : 1;
 
   const { data, isLoading: categoriesLoading } =
-    api.auth.getCategories.useQuery({ page: currentPage, pageSize: 6 });
+    api.auth.getCategories.useQuery(
+      { page: currentPage, pageSize: 6 },
+      {
+        retry: false,
+      },
+    );
 
-  const { data: userCategories } = api.auth.getUserCategories.useQuery();
+  const { data: userCategories } = api.auth.getUserCategories.useQuery(
+    undefined,
+    {
+      retry: false,
+    },
+  );
 
   const updateUserCategory = api.auth.updateUserCategories.useMutation({
     onMutate: async (newCategory) => {
@@ -59,27 +69,26 @@ export default function Categories({ searchParams }: props) {
   };
 
   useEffect(() => {
-    if (!user.id) {
-      router.push("/sign-in?redirect=categories");
-      return;
+    if (!isUserLoading && !user?.id) {
+      redirect("/sign-in?redirect=categories");
     }
-  }, [user, router]);
-  useEffect(() => {
-    const token = localStorage.getItem("token");
-    if (!token) {
-      router.push("/sign-in?redirect=categories");
+
+    if (!isUserLoading && !categoriesLoading && !data) {
+      void utils.auth.getUser.reset();
+      redirect("/sign-in?redirect=categories&sessionExpired=true");
     }
-  }, [router]);
+  }, [
+    data,
+    isUserLoading,
+    user,
+    categoriesLoading,
+    router,
+    utils.auth.getUser,
+  ]);
 
   useEffect(() => {
-    if (!categoriesLoading && data === undefined) {
-      localStorage.removeItem("token");
-      router.push("/sign-in?redirect=categories&sessionExpired=true");
-    }
-  }, [categoriesLoading, data, router]);
-
-  useEffect(() => {
-    router.push(`/categories?page=${currentPage}`);
+    if (!page) router.push(`/categories?page=${1}`);
+    if (isUserLoading || !user?.id) return;
     if (!categoriesLoading && data && currentPage < data.totalPages) {
       void utils.auth.getCategories.prefetch({
         page: currentPage + 1,
@@ -92,16 +101,15 @@ export default function Categories({ searchParams }: props) {
         pageSize: 6,
       });
     }
-  }, [currentPage, data, utils, categoriesLoading, router]);
-
-  useEffect(() => {
-    page === undefined && setCurrentPage(1);
-  }, [page]);
-
-  if (!user.id) {
-    router.push("/sign-in?redirect=categories");
-    return null;
-  }
+  }, [
+    currentPage,
+    data,
+    utils,
+    categoriesLoading,
+    router,
+    isUserLoading,
+    user,
+  ]);
 
   return (
     <main className="flex h-full flex-grow flex-col items-center">
@@ -125,7 +133,7 @@ export default function Categories({ searchParams }: props) {
               </label>
             </div>
             <ul className="h-40 space-y-2">
-              {categoriesLoading ? (
+              {categoriesLoading || isUserLoading ? (
                 <CategoryLoading />
               ) : (
                 <CategoryList
@@ -140,7 +148,6 @@ export default function Categories({ searchParams }: props) {
           <PaginationComponent
             currentPage={currentPage}
             totalPages={data?.totalPages ?? 1}
-            onPageChange={setCurrentPage}
           />
         </div>
       </div>

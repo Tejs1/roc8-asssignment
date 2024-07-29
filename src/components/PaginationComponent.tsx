@@ -1,3 +1,4 @@
+import Link from "next/link";
 import {
   Pagination,
   PaginationContent,
@@ -14,13 +15,11 @@ import {
 interface PaginationComponentProps {
   currentPage: number;
   totalPages: number;
-  onPageChange: (page: number) => void;
 }
 
 export default function PaginationComponent({
   currentPage,
   totalPages,
-  onPageChange,
 }: PaginationComponentProps) {
   const paginationButtons = () => {
     const buttons = [];
@@ -35,15 +34,13 @@ export default function PaginationComponent({
 
     for (let page = firstPage; page <= lastPage; page++) {
       buttons.push(
-        <PaginationItem key={page}>
-          <PaginationLink
-            className="h-8 w-8"
-            onClick={() => onPageChange(page)}
-            isActive={page === currentPage}
-          >
-            {page}
-          </PaginationLink>
-        </PaginationItem>,
+        <Link key={page} href={`/categories?page=${page}`}>
+          <PaginationItem>
+            <PaginationLink className="h-8 w-8" isActive={page === currentPage}>
+              {page}
+            </PaginationLink>
+          </PaginationItem>
+        </Link>,
       );
     }
 
@@ -53,45 +50,52 @@ export default function PaginationComponent({
   return (
     <Pagination className="mt-4">
       <PaginationContent>
-        <PaginationItem key="prev-10" className="h-8 w-8">
-          <PaginationLink
-            className="h-8 w-8"
-            disabled={currentPage <= 10}
-            onClick={() => onPageChange(Math.max(1, currentPage - 10))}
-          >
-            <ChevronsLeft className="h-4 w-4" />
-          </PaginationLink>
-        </PaginationItem>
-        <PaginationItem key="prev" className="h-8 w-8">
-          <PaginationLink
-            disabled={currentPage <= 1}
-            aria-disabled={currentPage <= 1}
-            onClick={() => onPageChange(currentPage - 1)}
-            className="h-8 w-8"
-          >
-            <ChevronLeft className="h-4 w-4" />
-          </PaginationLink>
-        </PaginationItem>
+        <Link
+          key="prev-10"
+          href={`/categories?page=${Math.max(1, currentPage - 10)}`}
+        >
+          <PaginationItem className="h-8 w-8">
+            <PaginationLink className="h-8 w-8" disabled={currentPage <= 10}>
+              <ChevronsLeft className="h-4 w-4" />
+            </PaginationLink>
+          </PaginationItem>
+        </Link>
+        <Link key="prev" href={`/categories?page=${currentPage - 1}`}>
+          <PaginationItem className="h-8 w-8">
+            <PaginationLink
+              disabled={currentPage <= 1}
+              aria-disabled={currentPage <= 1}
+              className="h-8 w-8"
+            >
+              <ChevronLeft className="h-4 w-4" />
+            </PaginationLink>
+          </PaginationItem>
+        </Link>
         {paginationButtons()}
-        <PaginationItem key="next" className="h-8 w-8">
-          <PaginationLink
-            className="h-8 w-8"
-            disabled={currentPage >= totalPages}
-            aria-disabled={currentPage >= totalPages}
-            onClick={() => onPageChange(currentPage + 1)}
-          >
-            <ChevronRight className="h-4 w-4" />
-          </PaginationLink>
-        </PaginationItem>
-        <PaginationItem key="next-10" className="h-8 w-8">
-          <PaginationLink
-            className="h-8 w-8"
-            disabled={currentPage + 5 > totalPages}
-            onClick={() => onPageChange(Math.min(totalPages, currentPage + 10))}
-          >
-            <ChevronsRightIcon className="h-4 w-4" />
-          </PaginationLink>
-        </PaginationItem>
+        <Link key="next" href={`/categories?page=${currentPage + 1}`}>
+          <PaginationItem className="h-8 w-8">
+            <PaginationLink
+              className="h-8 w-8"
+              disabled={currentPage >= totalPages}
+              aria-disabled={currentPage >= totalPages}
+            >
+              <ChevronRight className="h-4 w-4" />
+            </PaginationLink>
+          </PaginationItem>
+        </Link>
+        <Link
+          key="next-10"
+          href={`/categories?page=${Math.min(totalPages, currentPage + 10)}`}
+        >
+          <PaginationItem className="h-8 w-8">
+            <PaginationLink
+              className="h-8 w-8"
+              disabled={currentPage + 5 > totalPages}
+            >
+              <ChevronsRightIcon className="h-4 w-4" />
+            </PaginationLink>
+          </PaginationItem>
+        </Link>
       </PaginationContent>
     </Pagination>
   );
