@@ -65,7 +65,7 @@ export function NavBar() {
     <div className="w-full">
       <div className="flex w-full items-center justify-end gap-4 pr-4 pt-1">
         <Link href="/help"> Help</Link>
-        {user.id ? (
+        {user?.id ? (
           <>
             <Link href="/orders">Orders</Link>
             <Link href="/profile">Hi {user.name?.split(" ")[0]}</Link>
