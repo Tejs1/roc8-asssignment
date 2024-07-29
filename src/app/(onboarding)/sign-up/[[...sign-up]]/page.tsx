@@ -33,7 +33,7 @@ export default function SignUp() {
     defaultValues: initialState,
   });
   const utils = api.useUtils();
-  const { data: user, isLoading: isUserLoading } = useAuth();
+  const { user, isLoading: isUserLoading } = useAuth();
   const signup = api.auth.signup.useMutation();
 
   const [isLoading, setIsLoading] = React.useState<boolean>(false);
