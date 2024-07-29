@@ -16,19 +16,12 @@ export default function Categories({ searchParams }: props) {
 
   const { page } = searchParams;
   const [currentPage, setCurrentPage] = useState(page ? parseInt(page) : 1);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const utils = api.useUtils();
 
   const { data, isLoading: categoriesLoading } =
-    api.auth.getCategories.useQuery(
-      { page: currentPage, pageSize: 6 },
-      { enabled: isAuthenticated },
-    );
+    api.auth.getCategories.useQuery({ page: currentPage, pageSize: 6 });
 
-  const { data: userCategories } = api.auth.getUserCategories.useQuery(
-    undefined,
-    { enabled: isAuthenticated },
-  );
+  const { data: userCategories } = api.auth.getUserCategories.useQuery();
 
   const updateUserCategory = api.auth.updateUserCategories.useMutation({
     onMutate: async (newCategory) => {
@@ -66,55 +59,47 @@ export default function Categories({ searchParams }: props) {
   };
 
   useEffect(() => {
-    const checkAuth = () => {
-      const token = localStorage.getItem("token");
-      if (!token || !user.id) {
-        router.push("/sign-in?redirect=categories");
-      } else {
-        setIsAuthenticated(true);
-      }
-    };
-
-    checkAuth();
+    if (!user.id) {
+      router.push("/sign-in?redirect=categories");
+      return;
+    }
   }, [user, router]);
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      router.push("/sign-in?redirect=categories");
+    }
+  }, [router]);
 
   useEffect(() => {
-    if (!categoriesLoading && data === undefined && isAuthenticated) {
+    if (!categoriesLoading && data === undefined) {
       localStorage.removeItem("token");
       router.push("/sign-in?redirect=categories&sessionExpired=true");
     }
-  }, [categoriesLoading, data, router, isAuthenticated]);
+  }, [categoriesLoading, data, router]);
 
   useEffect(() => {
-    if (isAuthenticated) {
-      const url = `/categories?page=${currentPage}`;
-      if (window.location.pathname + window.location.search !== url) {
-        router.push(url);
-      }
-      if (!categoriesLoading && data) {
-        if (currentPage < data.totalPages) {
-          void utils.auth.getCategories.prefetch({
-            page: currentPage + 1,
-            pageSize: 6,
-          });
-        }
-        if (currentPage + 1 < data.totalPages) {
-          void utils.auth.getCategories.prefetch({
-            page: currentPage + 2,
-            pageSize: 6,
-          });
-        }
-      }
+    router.push(`/categories?page=${currentPage}`);
+    if (!categoriesLoading && data && currentPage < data.totalPages) {
+      void utils.auth.getCategories.prefetch({
+        page: currentPage + 1,
+        pageSize: 6,
+      });
     }
-  }, [currentPage, data, utils, categoriesLoading, router, isAuthenticated]);
+    if (!categoriesLoading && data && currentPage + 1 < data.totalPages) {
+      void utils.auth.getCategories.prefetch({
+        page: currentPage + 2,
+        pageSize: 6,
+      });
+    }
+  }, [currentPage, data, utils, categoriesLoading, router]);
 
   useEffect(() => {
-    if (page === undefined) {
-      setCurrentPage(1);
-    }
+    page === undefined && setCurrentPage(1);
   }, [page]);
 
-  if (!isAuthenticated) {
+  if (!user.id) {
+    router.push("/sign-in?redirect=categories");
     return null;
   }
 

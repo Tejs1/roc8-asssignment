@@ -2,10 +2,6 @@
 
 ## Fix
 
-- [*] fix flicker on categories page when user is not logged in
-- [ ] fix get started button link
-- [ ] add logout button
-- [ ] add profile page
 - [x] store user name in db
 - [ ] signout user button
 - [ ] if user is logged in, redirect to categories page
