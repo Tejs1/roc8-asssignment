@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { useRouter } from "next/navigation";
+import { redirect } from "next/navigation";
 import { api } from "@/trpc/react";
 import Link from "next/link";
 import { useForm, Controller, type SubmitHandler } from "react-hook-form";
@@ -10,7 +10,6 @@ import { Icons } from "@/components/icons";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { getToken } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
 
 interface SignUpFormData {
@@ -25,8 +24,6 @@ const initialState = {
 };
 
 export default function SignUp() {
-  const { updateUser } = useAuth();
-
   const {
     handleSubmit,
     control,
@@ -35,8 +32,9 @@ export default function SignUp() {
     mode: "onChange",
     defaultValues: initialState,
   });
+  const utils = api.useUtils();
+  const { data: user, isLoading: isUserLoading } = useAuth();
   const signup = api.auth.signup.useMutation();
-  const router = useRouter();
 
   const [isLoading, setIsLoading] = React.useState<boolean>(false);
 
@@ -50,12 +48,8 @@ export default function SignUp() {
       });
       if (result.success) {
         localStorage.setItem("token", result.token ?? "");
-        updateUser({
-          id: result.id,
-          name: result.name,
-          email: result.email,
-        });
-        router.push("/categories");
+        void utils.auth.getUser.invalidate();
+        redirect("/categories");
       }
     } catch (err) {
       console.error(JSON.stringify(err, null, 2));
@@ -65,11 +59,13 @@ export default function SignUp() {
   };
 
   React.useEffect(() => {
-    const token = getToken();
-    if (token) {
-      router.push("/categories");
+    if (user?.id && !isUserLoading) {
+      void utils.auth.getUser.refetch();
+      if (user?.id && !isUserLoading) {
+        redirect("/categories");
+      }
     }
-  }, [router]);
+  }, [user, isUserLoading, utils.auth.getUser]);
   return (
     <main className="flex h-full flex-grow flex-col items-center justify-center">
       <div className="m-auto grid w-[400px] gap-6 rounded-3xl border p-10">
