@@ -57,8 +57,11 @@ export function TRPCReactProvider(props: { children: React.ReactNode }) {
               "authorization",
               `Bearer ${localStorage.getItem("token")}`,
             );
+            headers.set("credentials", "include");
             return headers;
           },
+
+
         }),
       ],
     }),
