@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { useRouter } from "next/navigation";
+import { redirect } from "next/navigation";
 import { api } from "@/trpc/react";
 import Link from "next/link";
 import { useForm, Controller, type SubmitHandler } from "react-hook-form";
@@ -10,7 +10,6 @@ import { Icons } from "@/components/icons";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { getToken } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
 const initialState = {
   email: "",
@@ -30,9 +29,10 @@ export default function SignIn({ searchParams }: props) {
     mode: "onChange",
     defaultValues: initialState,
   });
+  const utils = api.useUtils();
   const login = api.auth.login.useMutation();
-  const router = useRouter();
-  const { updateUser } = useAuth();
+
+  const { user, isLoading: isUserLoading } = useAuth();
 
   const [isLoading, setIsLoading] = React.useState<boolean>(false);
 
@@ -45,12 +45,8 @@ export default function SignIn({ searchParams }: props) {
       });
       if (result.success) {
         localStorage.setItem("token", result.token ?? "");
-        updateUser({
-          id: result.id,
-          name: result.name,
-          email: result.email,
-        });
-        router.push("/categories");
+        void utils.auth.getUser.invalidate();
+        redirect("/categories");
       }
     } catch (err) {
       console.error(JSON.stringify(err, null, 2));
@@ -58,13 +54,15 @@ export default function SignIn({ searchParams }: props) {
       setIsLoading(false);
     }
   };
-
   React.useEffect(() => {
-    const token = getToken();
-    if (token) {
-      router.push("/categories");
+    if (user?.id && !isUserLoading) {
+      void utils.auth.getUser.refetch();
+      if (user?.id && !isUserLoading) {
+        redirect("/categories");
+      }
     }
-  }, [router]);
+  }, [user, isUserLoading, utils.auth.getUser]);
+
   return (
     <main className="flex h-full flex-grow flex-col items-center justify-center">
       <div className="m-auto grid w-[400px] gap-6 rounded-3xl border p-10">
