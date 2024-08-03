@@ -53,7 +53,7 @@ export const otps = createTable("otps", {
   email: varchar("email", { length: 255 }).notNull().unique(),
   name: text("name").notNull(),
   password: varchar("password", { length: 255 }).notNull(),
-  otp: varchar("otp", { length: 6 }).notNull(),
+  otp: varchar("otp", { length: 8 }).notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   expiresAt: timestamp("expires_at")
     .default(sql`NOW() + INTERVAL '5 minutes'`)

@@ -2,6 +2,11 @@
 
 ## Fix
 
+- [ ] show error states client side (wrong password, email not found, email already exists, token expired)
+- [ ] use form from shadcn for login and signup
+- [ ] add go back button on otp page
+- [ ] fix controlled input warning
+- [ ] refactor signup page signin page to use form from shadcn and
 - [*] fix flicker on categories page when user is not logged in
 - [ ] fix get started button link
 - [ ] add logout button

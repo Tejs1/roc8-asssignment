@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { redirect, useRouter } from "next/navigation";
+import { redirect } from "next/navigation";
 import { api } from "@/trpc/react";
 import Link from "next/link";
 import { useForm, Controller, type SubmitHandler } from "react-hook-form";
@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useAuth } from "@/contexts/AuthContext";
+import { InputOTPForm } from "@/components/InputOtp";
 
 interface SignUpFormData {
   name: string;
@@ -27,7 +28,6 @@ const initialState = {
 };
 
 export default function SignUp() {
-  const router = useRouter();
   const [step, setStep] = React.useState(1);
   const [userId, setUserId] = React.useState("");
   const {
@@ -38,19 +38,9 @@ export default function SignUp() {
     mode: "onChange",
     defaultValues: initialState,
   });
-  // otp form
-  const {
-    handleSubmit: handleSubmitOtp,
-    control: controlOtp,
-    formState: { errors: errorsOtp, isValid: isValidOtp },
-  } = useForm<OtpFormData>({
-    mode: "onChange",
-    defaultValues: { confirmOtp: "" },
-  });
   const utils = api.useUtils();
   const { user, isLoading: isUserLoading } = useAuth();
   const signup = api.auth.signup.useMutation();
-  const verifyOtp = api.auth.verifyOtp.useMutation();
 
   const [isLoading, setIsLoading] = React.useState<boolean>(false);
 
@@ -76,24 +66,6 @@ export default function SignUp() {
     setIsLoading(false);
   };
 
-  const onSubmitOtp: SubmitHandler<OtpFormData> = async (data) => {
-    setIsLoading(true);
-    try {
-      const result = await verifyOtp.mutateAsync({
-        otp: data.confirmOtp,
-        userId: userId,
-      });
-      if (result.success) {
-        localStorage.setItem("token", result.token ?? "");
-        setStep(3);
-        void utils.auth.getUser.invalidate();
-      }
-    } catch (err) {
-      console.error(JSON.stringify(err, null, 2));
-    } finally {
-      setIsLoading(false);
-    }
-  };
   React.useEffect(() => {
     if (step === 3) {
       redirect("/categories");
@@ -105,14 +77,15 @@ export default function SignUp() {
     if (step === 0) redirect("/sign-in");
   }, [step]);
 
-  // React.useEffect(() => {
-  //   if (user?.id && !isUserLoading) {
-  //     void utils.auth.getUser.refetch();
-  //     if (user?.id && !isUserLoading) {
-  //       redirect("/categories");
-  //     }
-  //   }
-  // }, [user, isUserLoading, utils.auth.getUser]);
+  React.useEffect(() => {
+    if (user?.id && !isUserLoading) {
+      void utils.auth.getUser.refetch();
+      if (user?.id && !isUserLoading) {
+        redirect("/categories");
+      }
+    }
+  }, [user, isUserLoading, utils.auth.getUser]);
+
   return (
     <main className="flex h-full flex-grow flex-col items-center justify-center">
       <div className="m-auto grid w-[400px] gap-6 rounded-3xl border p-10">
@@ -260,61 +233,7 @@ export default function SignUp() {
         {step === 2 && (
           <>
             <h1 className="text-[32px] font-semibold">Verify your Otp code</h1>
-            <form onSubmit={handleSubmitOtp(onSubmitOtp)}>
-              <div className="grid gap-1">
-                <div>
-                  <Label htmlFor="otp">
-                    <span className="ml-1">Otp</span>
-                    <Controller
-                      name="confirmOtp"
-                      control={controlOtp}
-                      rules={{
-                        required: "Otp is required",
-                        minLength: {
-                          value: 6,
-                          message: "Otp must be 6 characters",
-                        },
-                        validate: (value) =>
-                          value.trim().length > 0 ||
-                          "Otp cannot be empty spaces",
-                      }}
-                      render={({ field }) => (
-                        <Input
-                          {...field}
-                          id="otp"
-                          name="confirmOtp"
-                          placeholder="123456"
-                          autoCapitalize="none"
-                          autoComplete="off"
-                          autoCorrect="off"
-                          disabled={isLoading}
-                          className="mt-1"
-                          type="number"
-                        />
-                      )}
-                    />
-                  </Label>
-                  <div className="mt-1 min-h-5">
-                    {errorsOtp.confirmOtp && (
-                      <p className="text-sm text-destructive">
-                        {errorsOtp.confirmOtp.message}
-                      </p>
-                    )}
-                  </div>
-                </div>
-                <Button
-                  aria-disabled={isLoading}
-                  className="font-bold uppercase"
-                  type="submit"
-                  disabled={!isValidOtp || isLoading}
-                >
-                  {isLoading && (
-                    <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />
-                  )}
-                  Verify
-                </Button>
-              </div>
-            </form>
+            <InputOTPForm userId={userId} setStep={setStep} />
           </>
         )}
       </div>
