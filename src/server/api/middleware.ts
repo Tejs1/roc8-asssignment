@@ -17,10 +17,10 @@ export const authMiddleware = t.middleware(async ({ ctx, next }) => {
         user: verified.userId,
       },
     });
-  } catch (err: any) {
-    const Error = err as any;
+  } catch (err) {
+    const Error = err as { code?: string; reason?: string };
     if (Error.code === "ERR_JWT_EXPIRED") {
-      console.error(`JWT Verification Error: ${Error.code} - ${Error.reason}`);
+      console.error(`JWT Verification Error: ${Error.code} - ${Error?.reason}`);
     } else {
       console.error("JWT Verification Error:", err);
     }

@@ -22,6 +22,7 @@ import {
 } from "@/components/ui/input-otp";
 import { toast } from "@/components/ui/use-toast";
 import { api } from "@/trpc/react";
+import { useRouter } from "next/navigation";
 
 const FormSchema = z.object({
   pin: z.string().min(8, {
@@ -31,11 +32,11 @@ const FormSchema = z.object({
 
 export function InputOTPForm({
   userId,
-  setStep,
 }: {
   userId: string;
   setStep: (step: number) => void;
 }) {
+  const router = useRouter();
   const verifyOtp = api.auth.verifyOtp.useMutation();
   const utils = api.useUtils();
 
@@ -56,8 +57,9 @@ export function InputOTPForm({
       });
       if (result.success) {
         localStorage.setItem("token", result.token ?? "");
-        setStep(3);
+
         void utils.auth.getUser.invalidate();
+        router.push("/categories");
       }
     } catch (err) {
       console.error(JSON.stringify(err, null, 2));

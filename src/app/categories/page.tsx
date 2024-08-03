@@ -109,6 +109,7 @@ export default function Categories({ searchParams }: props) {
     router,
     isUserLoading,
     user,
+    page,
   ]);
 
   return (

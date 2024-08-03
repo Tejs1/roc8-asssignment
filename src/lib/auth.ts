@@ -1,4 +1,4 @@
-"use server";
+import "server-only";
 import { SignJWT, jwtVerify } from "jose";
 import { cookies } from "next/headers";
 import { env } from "@/env";
@@ -20,7 +20,7 @@ export async function verifyAuth(token: string) {
   return payload as { userId: string };
 }
 
-export function setAuthCookie(token: string) {
+export async function setAuthCookie(token: string) {
   cookies().set("authToken", token, {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
@@ -30,11 +30,11 @@ export function setAuthCookie(token: string) {
   });
 }
 
-export function clearAuthCookie() {
+export async function clearAuthCookie() {
   cookies().delete("authToken");
 }
 
-export function getAuthCookie() {
+export async function getAuthCookie() {
   return cookies().get("authToken");
 }
 
@@ -65,7 +65,7 @@ export async function testOtp(email: string, otp: string): Promise<void> {
         return process.exit(1);
       }
 
-      let transporter = nodemailer.createTransport({
+      const transporter = nodemailer.createTransport({
         host: account.smtp.host,
         port: account.smtp.port,
         secure: account.smtp.secure,
@@ -74,7 +74,7 @@ export async function testOtp(email: string, otp: string): Promise<void> {
           pass: account.pass,
         },
       });
-      let message = {
+      const message = {
         from: account.user,
         to: email,
         subject: "Nodemailer is unicode friendly ✔",
@@ -86,6 +86,8 @@ export async function testOtp(email: string, otp: string): Promise<void> {
           console.log("Error occurred. " + err.message);
           return process.exit(1);
         }
+        console.log("Message sent: %s", info.messageId);
+        console.log("Preview URL: %s", nodemailer.getTestMessageUrl(info));
       });
     });
   } catch (error) {

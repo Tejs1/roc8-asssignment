@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { redirect } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { api } from "@/trpc/react";
 import Link from "next/link";
 import { useForm, Controller, type SubmitHandler } from "react-hook-form";
@@ -18,9 +18,7 @@ interface SignUpFormData {
   email: string;
   password: string;
 }
-interface OtpFormData {
-  confirmOtp: string;
-}
+
 const initialState = {
   name: "",
   message: "",
@@ -30,6 +28,7 @@ const initialState = {
 export default function SignUp() {
   const [step, setStep] = React.useState(1);
   const [userId, setUserId] = React.useState("");
+  const router = useRouter();
   const {
     handleSubmit,
     control,
@@ -55,8 +54,7 @@ export default function SignUp() {
     if (!result.success) {
       if (result.code === "EMAIL_EXISTS_VERIFIED") {
         console.log("Email already exists");
-        // show error message
-        setStep(0);
+        router.push("/sign-in");
       }
     }
     if (result.success && result.userId) {
@@ -67,24 +65,13 @@ export default function SignUp() {
   };
 
   React.useEffect(() => {
-    if (step === 3) {
-      redirect("/categories");
-    }
-  }, [step]);
-
-  React.useEffect(() => {
-    if (step === 3) redirect("/categories");
-    if (step === 0) redirect("/sign-in");
-  }, [step]);
-
-  React.useEffect(() => {
     if (user?.id && !isUserLoading) {
       void utils.auth.getUser.refetch();
       if (user?.id && !isUserLoading) {
-        redirect("/categories");
+        router.push("/categories");
       }
     }
-  }, [user, isUserLoading, utils.auth.getUser]);
+  }, [user, isUserLoading, utils.auth.getUser, router]);
 
   return (
     <main className="flex h-full flex-grow flex-col items-center justify-center">
