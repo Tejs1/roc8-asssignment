@@ -60,8 +60,6 @@ export function TRPCReactProvider(props: { children: React.ReactNode }) {
             headers.set("credentials", "include");
             return headers;
           },
-
-
         }),
       ],
     }),
