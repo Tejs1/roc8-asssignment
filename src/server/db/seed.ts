@@ -1,3 +1,4 @@
+import "server-only";
 import { categories, users, userCategories } from "@/server/db/schema";
 import { db } from "@/server/db";
 import { seedCategories } from "./seedCategories";

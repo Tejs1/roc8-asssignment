@@ -18,7 +18,13 @@ export const authMiddleware = t.middleware(async ({ ctx, next }) => {
       },
     });
   } catch (err) {
-    console.error("JWT Verification Error:", err);
+    const Error = err as { code?: string; reason?: string };
+    if (Error.code === "ERR_JWT_EXPIRED") {
+      console.error(`JWT Verification Error: ${Error.code} - ${Error?.reason}`);
+    } else {
+      console.error("JWT Verification Error:", err);
+    }
+
     throw new TRPCError({ code: "UNAUTHORIZED" });
   }
 });

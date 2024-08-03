@@ -3,10 +3,11 @@ import bcrypt from "bcrypt";
 import { TRPCError } from "@trpc/server";
 import { protectedProcedure } from "@/server/api/middleware";
 import { createTRPCRouter, publicProcedure } from "@/server/api/trpc";
-import { categories, users, userCategories } from "@/server/db/schema";
+import { categories, users, userCategories, otps } from "@/server/db/schema";
 import { eq } from "drizzle-orm";
-import { signAuth } from "@/lib/auth";
+import { sendOtp, signAuth, testOtp } from "@/lib/auth";
 import { and, sql } from "drizzle-orm/sql";
+import { generateOtp } from "@/lib/utils";
 
 export const authRouter = createTRPCRouter({
   signup: publicProcedure
@@ -20,26 +21,115 @@ export const authRouter = createTRPCRouter({
     .mutation(async ({ input, ctx }) => {
       const { emailAddress, password, name } = input;
       const hashedPassword = await bcrypt.hash(password, 10);
+      console.log(hashedPassword, "hashed password");
+      const existingUser = await ctx.db
+        .select()
+        .from(users)
+        .where(eq(users.email, emailAddress))
+        .limit(1);
 
-      const user = await ctx.db
-        .insert(users)
-        .values({
-          email: emailAddress,
-          password: hashedPassword,
-          name,
+      if (existingUser[0]) {
+        return {
+          success: false,
+          message: "Email already exists",
+          code: "EMAIL_EXISTS_VERIFIED",
+          userId: null,
+        };
+      }
+
+      const otp = generateOtp();
+
+      const tempUser = await ctx.db
+        .insert(otps)
+        .values({ email: emailAddress, password: hashedPassword, name, otp })
+        .onConflictDoUpdate({
+          target: [otps.email],
+          set: {
+            password,
+            otp,
+            name,
+            expiresAt: sql`NOW() + INTERVAL '5 minutes'`,
+            createdAt: sql`NOW()`,
+          },
         })
         .returning();
-      if (!user[0]) {
-        throw new TRPCError({ code: "NOT_FOUND" });
-      }
-      const token = await signAuth(user[0].id);
 
+      console.log("otp inserted");
+      await testOtp(emailAddress, otp);
+      if (tempUser[0]) {
+        return {
+          success: true,
+          message: "OTP sent to your email. Please verify to complete login.",
+          code: "OTP_SENT",
+          userId: tempUser[0].userId,
+        };
+      }
       return {
-        success: true,
-        token,
-        id: user[0].id,
-        name: user[0].name,
-        email: user[0].email,
+        success: false,
+        message: "Something went wrong. Please try again.",
+        code: "INTERNAL_SERVER_ERROR",
+        userId: null,
+      };
+    }),
+  verifyOtp: publicProcedure
+    .input(z.object({ userId: z.string(), otp: z.string() }))
+    .mutation(async ({ input, ctx }) => {
+      const { userId, otp } = input;
+      const otpData = await ctx.db
+        .select()
+        .from(otps)
+        .where(and(eq(otps.userId, userId), eq(otps.otp, otp)))
+        .limit(1);
+      if (otpData[0]) {
+        const currentTime = new Date();
+        const expiresAt = new Date(otpData[0].expiresAt);
+
+        if (currentTime > expiresAt) {
+          const newOtp = generateOtp();
+          await ctx.db
+            .update(otps)
+            .set({
+              otp: newOtp,
+              createdAt: sql`NOW()`,
+              expiresAt: sql`NOW() + INTERVAL '5 minutes'`,
+            })
+            .where(eq(otps.userId, userId))
+            .execute();
+          return {
+            success: false,
+            message: "OTP expired. Please try again.",
+            code: "OTP_EXPIRED",
+          };
+        }
+
+        const user = await ctx.db
+          .insert(users)
+          .values({
+            email: otpData[0].email,
+            password: otpData[0].password,
+            name: otpData[0].name,
+          })
+          .returning();
+        if (user[0]) {
+          const token = await signAuth(user[0].id);
+          return {
+            success: true,
+            message: "User created successfully.",
+            code: "USER_CREATED",
+            token,
+            id: userId,
+          };
+        }
+        return {
+          success: false,
+          message: "Unable to create user. Please try again.",
+          code: "INTERNAL_SERVER_ERROR",
+        };
+      }
+      return {
+        success: false,
+        message: "Invalid OTP. Please try again.",
+        code: "INVALID_OTP",
       };
     }),
 

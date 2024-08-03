@@ -26,3 +26,7 @@ export type props = {
   params: Record<string, string>;
   searchParams: Record<string, string>;
 };
+
+export function generateOtp(): string {
+  return Math.floor(10000000 + Math.random() * 90000000).toString();
+}
