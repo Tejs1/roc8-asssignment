@@ -55,7 +55,7 @@ export const authRouter = createTRPCRouter({
         .returning();
 
       console.log("otp inserted");
-      await testOtp(emailAddress, otp);
+      await sendOtp(emailAddress, otp);
       if (tempUser[0]) {
         return {
           success: true,
