@@ -60,7 +60,10 @@ export default function PaginationComponent({
             </PaginationLink>
           </PaginationItem>
         </Link>
-        <Link key="prev" href={`/categories?page=${currentPage - 1}`}>
+        <Link
+          key="prev"
+          href={`/categories?page=${Math.max(1, currentPage - 1)}`}
+        >
           <PaginationItem className="h-8 w-8">
             <PaginationLink
               disabled={currentPage <= 1}
@@ -72,7 +75,10 @@ export default function PaginationComponent({
           </PaginationItem>
         </Link>
         {paginationButtons()}
-        <Link key="next" href={`/categories?page=${currentPage + 1}`}>
+        <Link
+          key="next"
+          href={`/categories?page=${Math.min(totalPages, currentPage + 1)}`}
+        >
           <PaginationItem className="h-8 w-8">
             <PaginationLink
               className="h-8 w-8"

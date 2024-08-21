@@ -26,7 +26,9 @@ export default async function IndexPage() {
           </p>
           <div className="space-x-4">
             <Link
-              href="/sign-in"
+              href={{
+                pathname: "/sign-in",
+              }}
               className={cn(buttonVariants({ size: "lg" }))}
             >
               Get Started
@@ -50,7 +52,7 @@ export default async function IndexPage() {
           <h2 className="font-heading text-3xl leading-[1.1] sm:text-3xl md:text-6xl">
             Features
           </h2>
-          <p className="max-w-[85%] leading-normal text-muted-foreground sm:text-lg sm:leading-7">
+          <p className="max-w-[85%] text-muted-foreground sm:text-lg sm:leading-7">
             This project is an experiment to see how a modern app, with features
             like auth, subscriptions, API routes, and static pages would work in
             Next.js 14 app dir.
@@ -122,13 +124,13 @@ export default async function IndexPage() {
                 <path
                   fillRule="evenodd"
                   d="M165.735 25.0701 188.947.972412H.465994V25.0701H165.735Z"
-                  clip-rule="evenodd"
+                  clipRule="evenodd"
                 />
                 <path d="m163.981 96.3239 90.041-92.64076-32.816-.00019-75.589 77.07795 18.364 15.563Zm69.677 35.0941c0 23.657-19.178 42.836-42.835 42.836-19.108 0-35.31-12.516-40.823-29.815l-3.375-10.591-19.296 19.295 1.763 4.193c10.123 24.085 33.942 41.018 61.731 41.018 36.968 0 66.936-29.968 66.936-66.936 0-24.481-13.36-45.6784-32.803-57.3275l-4.561-2.7323-17.668 17.8946 8.061 4.2555c13.615 7.1877 22.87 21.4727 22.87 37.9097Z" />
                 <path
                   fillRule="evenodd"
                   d="m88.2625 192.669.0001-147.0231H64.1648V192.669h24.0977Z"
-                  clip-rule="evenodd"
+                  clipRule="evenodd"
                 />
               </svg>
               <div className="space-y-2">
